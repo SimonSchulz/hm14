@@ -1,0 +1,46 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { UsersService } from '../application/users.service';
+import { UsersQueryRepository } from '../infrastructure/repositories/users.query.repository';
+import { InputUserDto } from '../dto/user.input.dto';
+import { UsersQueryParams } from '../dto/users-query-params.input-dto';
+
+@Controller('users')
+export class UsersController {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly usersQueryRepository: UsersQueryRepository,
+  ) {}
+
+  @Get()
+  async getUsers(@Query() query: UsersQueryParams) {
+    return this.usersQueryRepository.findAllUsers(query);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async createUser(@Body() dto: InputUserDto) {
+    const userId = await this.usersService.create(dto);
+    const newUser = await this.usersQueryRepository.findById(userId);
+    if (!newUser) throw new BadRequestException('Invalid user data');
+    return newUser;
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteUser(@Param('id') id: string) {
+    const deleted = await this.usersService.delete(id);
+    if (!deleted) throw new NotFoundException('User does not exist');
+  }
+}
