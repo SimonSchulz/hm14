@@ -92,7 +92,10 @@ export class AuthService {
     );
   }
   async confirmRegistration(code: string) {
-    return this.usersService.setConfirmationEmail(code);
+    const result = await this.usersService.setConfirmationEmail(code);
+    if (!result) {
+      throw new BadRequestException('email already confirmed or not exist');
+    }
   }
   async resendConfirmationEmail(email: string) {
     const code = await this.usersService.updateConfirmationEmail(email);

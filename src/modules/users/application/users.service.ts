@@ -39,7 +39,7 @@ export class UsersService {
   async setConfirmationEmail(confirmationCode: string): Promise<boolean> {
     const user =
       await this.usersRepository.findByConfirmationCode(confirmationCode);
-    if (!user) {
+    if (!user || user.emailConfirmation.isConfirmed) {
       return false;
     }
     const recovery = user.emailConfirmation;
