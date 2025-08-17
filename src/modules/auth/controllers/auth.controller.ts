@@ -16,6 +16,7 @@ import { ExtractUserFromRequest } from '../../../core/decorators/transform/extra
 import { UserContextDto } from '../../../core/dto/user-context.dto';
 import { ResendingInputDto } from '../dto/resending.input-dto';
 import { NewPasswordInputDto } from '../dto/new-password.input-dto';
+import { LocalAuthGuard } from '../guards/local/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
 
   // POST /auth/login
   @Post('login')
+  @UseGuards(LocalAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async login(@Body() dto: LoginInputDto) {
     return this.authService.login(dto.loginOrEmail, dto.password);
@@ -32,7 +34,7 @@ export class AuthController {
   @Post('registration')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async register(@Body() dto: RegistrationInputDto) {
-    await this.authService.registerUser(dto.login, dto.password, dto.email);
+    await this.authService.registerUser(dto);
   }
 
   // POST /auth/registration-confirmation

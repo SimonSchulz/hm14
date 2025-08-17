@@ -3,15 +3,18 @@ import { UsersRepository } from '../infrastructure/repositories/users.repository
 import { InputUserDto } from '../dto/user.input.dto';
 import { User } from '../domain/entities/user.entity';
 import { UsersQueryRepository } from '../infrastructure/repositories/users.query.repository';
+import { BcryptService } from '../../auth/application/bcrypt.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly bcryptService: BcryptService,
   ) {}
 
   async create(dto: InputUserDto): Promise<string> {
+    dto.password = await this.bcryptService.generateHash(dto.password);
     const user = new User(dto.login, dto.email, dto.password);
     return this.usersRepository.create(user);
   }

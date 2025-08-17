@@ -4,7 +4,7 @@ import { addMinutes } from 'date-fns';
 export class User {
   login: string;
   email: string;
-  password: string;
+  passwordHash: string;
   createdAt: string;
   emailConfirmation: {
     confirmationCode: string;
@@ -19,7 +19,7 @@ export class User {
   constructor(login: string, email: string, passwordHash: string) {
     this.login = login;
     this.email = email;
-    this.password = passwordHash;
+    this.passwordHash = passwordHash;
     this.createdAt = new Date().toISOString();
     this.emailConfirmation = {
       confirmationCode: randomUUID(),
@@ -27,8 +27,8 @@ export class User {
       isConfirmed: false,
     };
     this.passwordRecovery = {
-      recoveryCode: null,
-      expirationDate: null,
+      recoveryCode: '',
+      expirationDate: this.createdAt,
     };
   }
 }

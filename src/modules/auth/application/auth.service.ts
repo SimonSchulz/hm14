@@ -7,6 +7,7 @@ import { emailExamples } from '../domain/tamplates/email-confirmation-message';
 import { UsersService } from '../../users/application/users.service';
 import { DomainException } from '../../../core/exeptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exeptions/domain-exception-codes';
+import { RegistrationInputDto } from '../dto/registration-input.dto';
 
 @Injectable()
 export class AuthService {
@@ -38,30 +39,30 @@ export class AuthService {
     return user;
   }
 
-  async registerUser(
-    login: string,
-    pass: string,
-    email: string,
-  ): Promise<string> {
+  async registerUser(dto: RegistrationInputDto): Promise<string> {
     const isUserExists =
-      await this.usersQueryRepository.checkExistByLoginOrEmail(login, email);
-
+      await this.usersQueryRepository.checkExistByLoginOrEmail(
+        dto.login,
+        dto.email,
+      );
     if (isUserExists) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'wrong credentials',
       });
     }
-
-    const passwordHash = await this.bcryptService.generateHash(pass);
-    const newUser = new User(login, email, passwordHash);
-
-    const id = await this.usersService.create(newUser);
-
+    const id = await this.usersService.create(dto);
+    const user = await this.usersQueryRepository.findByLoginOrEmail(dto.email);
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.ValidationError,
+        message: 'Problem with user creation',
+      });
+    }
     this.nodemailerService
       .sendEmail(
-        newUser.email,
-        newUser.emailConfirmation.confirmationCode,
+        user.email,
+        user.emailConfirmation.confirmationCode,
         emailExamples.registrationEmail,
       )
       .catch((err) => console.error('Error in send email:', err));
@@ -86,7 +87,7 @@ export class AuthService {
     const recovery = user.passwordRecovery;
     await this.nodemailerService.sendEmail(
       email,
-      recovery.recoveryCode!,
+      recovery.recoveryCode,
       emailExamples.registrationEmail,
     );
   }
