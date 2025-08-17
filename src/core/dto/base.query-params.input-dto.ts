@@ -11,7 +11,7 @@ export class BaseQueryParams {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(10)
+  @Min(1)
   pageSize: number = 10;
   @IsOptional()
   @IsEnum(SortDirection)
