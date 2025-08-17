@@ -1,64 +1,82 @@
 import {
-  ArgumentsHost,
-  Catch,
   ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { DomainException } from '../domain-exceptions';
-import { Request, Response } from 'express';
-import { DomainExceptionCode } from '../domain-exception-codes';
-import { ErrorResponseBody } from './error-response-body.type';
+import { Response } from 'express';
+import { ValidationError } from 'class-validator';
 
-@Catch(DomainException)
-export class DomainHttpExceptionsFilter implements ExceptionFilter {
-  catch(exception: DomainException, host: ArgumentsHost): void {
+export interface ErrorMessage {
+  message: string;
+  field: string;
+}
+
+@Catch()
+export class UniversalExceptionFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const res = ctx.getResponse<Response>();
 
-    const status = this.mapToHttpStatus(exception.code);
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // Если это ошибка валидации, форматируем под тест
-    if (exception.code === DomainExceptionCode.ValidationError) {
-      const errorsMessages = exception.extensions.map((ext) => ({
-        message: ext.message,
-        field: ext.key,
-      }));
+    // Если не валидация (не 400) — обычный формат
+    if (status !== HttpStatus.BAD_REQUEST) {
+      const message =
+        exception instanceof HttpException
+          ? (exception.getResponse() as any)?.message || exception.message
+          : exception instanceof Error
+            ? exception.message
+            : 'Internal server error';
 
-      response.status(status).json({ errorsMessages });
+      res.status(status).json({ statusCode: status, message });
       return;
     }
 
-    // Для остальных DomainException оставляем старый формат
-    const responseBody: ErrorResponseBody = {
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      message: exception.message,
-      code: exception.code,
-      extensions: exception.extensions,
-    };
+    // Валидационные ошибки (400)
+    const errorsMessages: ErrorMessage[] = [];
 
-    response.status(status).json(responseBody);
-  }
+    if (exception instanceof HttpException) {
+      const response = exception.getResponse();
 
-  private mapToHttpStatus(code: DomainExceptionCode): number {
-    switch (code) {
-      case DomainExceptionCode.BadRequest:
-      case DomainExceptionCode.ValidationError:
-      case DomainExceptionCode.ConfirmationCodeExpired:
-      case DomainExceptionCode.EmailNotConfirmed:
-      case DomainExceptionCode.PasswordRecoveryCodeExpired:
-        return HttpStatus.BAD_REQUEST;
-      case DomainExceptionCode.Forbidden:
-        return HttpStatus.FORBIDDEN;
-      case DomainExceptionCode.NotFound:
-        return HttpStatus.NOT_FOUND;
-      case DomainExceptionCode.Unauthorized:
-        return HttpStatus.UNAUTHORIZED;
-      case DomainExceptionCode.InternalServerError:
-        return HttpStatus.INTERNAL_SERVER_ERROR;
-      default:
-        return HttpStatus.I_AM_A_TEAPOT;
+      if (Array.isArray(response)) {
+        (response as ValidationError[]).forEach((err) => {
+          if (err.constraints) {
+            Object.values(err.constraints).forEach((msg) => {
+              // если property есть — используем, иначе вытаскиваем первое слово из сообщения
+              const field = err.property || msg.split(' ')[0] || 'unknown';
+              errorsMessages.push({ message: msg, field });
+            });
+          } else {
+            const field = err.property || 'unknown';
+            errorsMessages.push({
+              message: 'Validation error',
+              field,
+            });
+          }
+        });
+      } else if (typeof response === 'object' && response !== null) {
+        const messages = (response as any).message;
+        if (Array.isArray(messages)) {
+          messages.forEach((msg) => {
+            const field =
+              typeof msg === 'string' ? msg.split(' ')[0] : 'unknown';
+            errorsMessages.push({ message: String(msg), field });
+          });
+        } else if (typeof messages === 'string') {
+          const field = messages.split(' ')[0];
+          errorsMessages.push({ message: messages, field });
+        }
+      } else if (typeof response === 'string') {
+        const field = response.split(' ')[0];
+        errorsMessages.push({ message: response, field });
+      }
     }
+
+    res.status(status).json({ errorsMessages });
   }
 }

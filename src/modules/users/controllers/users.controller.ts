@@ -10,12 +10,15 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/repositories/users.query.repository';
 import { InputUserDto } from '../dto/user.input.dto';
 import { UsersQueryParams } from '../dto/users-query-params.input-dto';
+import { BasicAuthGuard } from '../../auth/guards/basic/basic-auth.guard';
 
+@UseGuards(BasicAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(

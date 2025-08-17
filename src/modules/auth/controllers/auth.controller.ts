@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   UseGuards,
   UsePipes,
@@ -23,12 +25,14 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   login(@ExtractUserFromRequest() user: UserContextDto) {
     console.log(user);
     return this.authService.login(user.id);
   }
 
   @Post('registration')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async register(@Body() dto: RegistrationInputDto) {
     await this.authService.registerUser(dto);
