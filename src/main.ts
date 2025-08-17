@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { appSetup } from './app.setup';
 import { DomainHttpExceptionsFilter } from './core/exeptions/filters/domain-exceptions.filter';
 import { AllHttpExceptionsFilter } from './core/exeptions/filters/all-exceptions.filter';
-
+import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.enableCors();
   appSetup(app);
   app.useGlobalFilters(

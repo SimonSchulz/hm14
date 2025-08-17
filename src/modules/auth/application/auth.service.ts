@@ -1,13 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BcryptService } from './bcrypt.service';
 import { NodemailerService } from './nodemailer.service';
 import { UsersQueryRepository } from '../../users/infrastructure/repositories/users.query.repository';
-import { User } from '../../users/domain/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 import { emailExamples } from '../domain/tamplates/email-confirmation-message';
 import { UsersService } from '../../users/application/users.service';
 import { DomainException } from '../../../core/exeptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exeptions/domain-exception-codes';
 import { RegistrationInputDto } from '../dto/registration-input.dto';
+import { UserContextDto } from '../../../core/dto/user-context.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,12 +17,16 @@ export class AuthService {
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly bcryptService: BcryptService,
     private readonly nodemailerService: NodemailerService,
+    private jwtService: JwtService,
   ) {}
-  async login(loginOrEmail: string, password: string) {
-    const user = await this.validateUser(loginOrEmail, password);
-    if (!user) return null;
+  login(userId: string) {
+    const accessToken = this.jwtService.sign({
+      id: userId,
+    } as UserContextDto);
 
-    //return { accessToken, refreshToken };
+    return {
+      accessToken,
+    };
   }
 
   async validateUser(loginOrEmail: string, password: string) {

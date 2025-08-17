@@ -10,10 +10,14 @@ import { AuthService } from '../auth/application/auth.service';
 import { BcryptService } from '../auth/application/bcrypt.service';
 import { NodemailerService } from '../auth/application/nodemailer.service';
 import { AuthController } from '../auth/controllers/auth.controller';
+import { LocalStrategy } from '../auth/guards/local/local.strategy';
+import { JwtStrategy } from '../auth/guards/bearer/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'access-token-secret',
       signOptions: { expiresIn: '6m' },
@@ -27,6 +31,8 @@ import { AuthController } from '../auth/controllers/auth.controller';
     AuthService,
     BcryptService,
     NodemailerService,
+    LocalStrategy,
+    JwtStrategy,
   ],
   exports: [
     MongooseModule,

@@ -8,17 +8,19 @@ import { DomainExceptionCode } from '../../../../core/exeptions/domain-exception
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super({ usernameField: 'login' });
+    super({ usernameField: 'loginOrEmail', passwordField: 'password' });
   }
-  async validate(username: string, password: string): Promise<UserContextDto> {
-    const user = await this.authService.validateUser(username, password);
+  async validate(
+    loginOrEmail: string,
+    password: string,
+  ): Promise<UserContextDto> {
+    const user = await this.authService.validateUser(loginOrEmail, password);
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
         message: 'Invalid username or password',
       });
     }
-
     return user as UserContextDto;
   }
 }
