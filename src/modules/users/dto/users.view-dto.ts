@@ -14,4 +14,11 @@ export class UserViewDto {
     dto.createdAt = user.createdAt;
     return dto;
   }
+  static mapToMe(user: UserDocument) {
+    return {
+      email: user.email,
+      login: user.login,
+      userId: user._id.toString(),
+    };
+  }
 }

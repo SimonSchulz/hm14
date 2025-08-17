@@ -19,6 +19,29 @@ export class UsersQueryRepository {
     }
     return UserViewDto.mapToView(user);
   }
+  async me(id: string) {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    return UserViewDto.mapToMe(user);
+  }
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
+  }
+  async checkExistByLoginOrEmail(
+    login: string,
+    email: string,
+  ): Promise<boolean> {
+    const user = await this.userModel
+      .findOne({
+        $or: [{ email }, { login }],
+      })
+      .lean();
+    return !!user;
+  }
   async findAllUsers(
     query: UsersQueryParams,
   ): Promise<PaginatedViewDto<UserViewDto[]>> {

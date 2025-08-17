@@ -19,4 +19,42 @@ export class UsersService {
   async delete(id: string): Promise<boolean> {
     return this.usersRepository.delete(id);
   }
+  async setNewPassword(
+    passwordHash: string,
+    recoveryCode: string,
+  ): Promise<boolean> {
+    const user = await this.usersRepository.findByRecoveryCode(recoveryCode);
+    if (!user) return false;
+    const recovery = user.passwordRecovery;
+    if (recovery.expirationDate && recovery.expirationDate < new Date()) {
+      return false;
+    }
+    user.setPassword(passwordHash);
+    await user.save();
+    return true;
+  }
+  async setConfirmationEmail(confirmationCode: string): Promise<boolean> {
+    const user =
+      await this.usersRepository.findByConfirmationCode(confirmationCode);
+    if (!user) {
+      return false;
+    }
+    const recovery = user.emailConfirmation;
+    if (
+      confirmationCode !== recovery.confirmationCode ||
+      (recovery.expirationDate && recovery.expirationDate < new Date())
+    ) {
+      return false;
+    }
+    user.setEmailConfirmation();
+    await user.save();
+    return true;
+  }
+  async updateConfirmationEmail(email: string) {
+    const user = await this.usersQueryRepository.findByLoginOrEmail(email);
+    if (!user) return false;
+    user.setEmailConfirmationCode();
+    await user.save();
+    return user.emailConfirmation.confirmationCode;
+  }
 }
