@@ -17,7 +17,26 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const status = this.mapToHttpStatus(exception.code);
-    const responseBody = this.buildResponseBody(exception, request.url);
+
+    // Если это ошибка валидации, форматируем под тест
+    if (exception.code === DomainExceptionCode.ValidationError) {
+      const errorsMessages = exception.extensions.map((ext) => ({
+        message: ext.message,
+        field: ext.key,
+      }));
+
+      response.status(status).json({ errorsMessages });
+      return;
+    }
+
+    // Для остальных DomainException оставляем старый формат
+    const responseBody: ErrorResponseBody = {
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      message: exception.message,
+      code: exception.code,
+      extensions: exception.extensions,
+    };
 
     response.status(status).json(responseBody);
   }
@@ -41,18 +60,5 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
       default:
         return HttpStatus.I_AM_A_TEAPOT;
     }
-  }
-
-  private buildResponseBody(
-    exception: DomainException,
-    requestUrl: string,
-  ): ErrorResponseBody {
-    return {
-      timestamp: new Date().toISOString(),
-      path: requestUrl,
-      message: exception.message,
-      code: exception.code,
-      extensions: exception.extensions,
-    };
   }
 }
