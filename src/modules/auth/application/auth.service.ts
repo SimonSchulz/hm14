@@ -64,14 +64,11 @@ export class AuthService {
         message: 'Problem with user creation',
       });
     }
-    this.nodemailerService
-      .sendEmail(
-        user.email,
-        user.emailConfirmation.confirmationCode,
-        emailExamples.registrationEmail,
-      )
-      .catch((err) => console.error('Error in send email:', err));
-
+    this.nodemailerService.sendEmail(
+      user.email,
+      user.emailConfirmation.confirmationCode,
+      emailExamples.registrationEmail,
+    );
     return id;
   }
   async changePassword(
@@ -90,7 +87,7 @@ export class AuthService {
     user.setRecoveryCode();
     await user.save();
     const recovery = user.passwordRecovery;
-    await this.nodemailerService.sendEmail(
+    this.nodemailerService.sendEmail(
       email,
       recovery.recoveryCode,
       emailExamples.registrationEmail,
@@ -102,7 +99,7 @@ export class AuthService {
   async resendConfirmationEmail(email: string) {
     const code = await this.usersService.updateConfirmationEmail(email);
     if (!code) return false;
-    await this.nodemailerService.sendEmail(
+    this.nodemailerService.sendEmail(
       email,
       code,
       emailExamples.registrationEmail,
