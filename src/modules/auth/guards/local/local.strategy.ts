@@ -1,6 +1,6 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../../application/auth.service';
 import { UserContextDto } from '../../../../core/dto/user-context.dto';
 import { DomainException } from '../../../../core/exeptions/domain-exceptions';
@@ -16,10 +16,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   ): Promise<UserContextDto> {
     const user = await this.authService.validateUser(loginOrEmail, password);
     if (!user) {
-      throw new DomainException({
-        code: DomainExceptionCode.Unauthorized,
-        message: 'Invalid username or password',
-      });
+      throw new UnauthorizedException('Invalid login or password');
     }
     return user as UserContextDto;
   }

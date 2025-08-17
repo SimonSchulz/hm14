@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BcryptService } from './bcrypt.service';
 import { NodemailerService } from './nodemailer.service';
 import { UsersQueryRepository } from '../../users/infrastructure/repositories/users.query.repository';
@@ -51,18 +55,12 @@ export class AuthService {
         dto.email,
       );
     if (isUserExists) {
-      throw new DomainException({
-        code: DomainExceptionCode.BadRequest,
-        message: 'wrong credentials',
-      });
+      throw new BadRequestException('email already used');
     }
     const id = await this.usersService.create(dto);
     const user = await this.usersQueryRepository.findByLoginOrEmail(dto.email);
     if (!user) {
-      throw new DomainException({
-        code: DomainExceptionCode.ValidationError,
-        message: 'Problem with user creation',
-      });
+      throw new NotFoundException('user not found');
     }
     this.nodemailerService.sendEmail(
       user.email,
