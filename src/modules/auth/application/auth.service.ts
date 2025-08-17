@@ -9,8 +9,6 @@ import { UsersQueryRepository } from '../../users/infrastructure/repositories/us
 import { JwtService } from '@nestjs/jwt';
 import { emailExamples } from '../domain/tamplates/email-confirmation-message';
 import { UsersService } from '../../users/application/users.service';
-import { DomainException } from '../../../core/exeptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../core/exeptions/domain-exception-codes';
 import { RegistrationInputDto } from '../dto/registration-input.dto';
 import { UserContextDto } from '../../../core/dto/user-context.dto';
 

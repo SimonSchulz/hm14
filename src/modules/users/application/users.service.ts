@@ -4,7 +4,7 @@ import { InputUserDto } from '../dto/user.input.dto';
 import { User } from '../domain/entities/user.entity';
 import { UsersQueryRepository } from '../infrastructure/repositories/users.query.repository';
 import { BcryptService } from '../../auth/application/bcrypt.service';
-
+import { UserDocument } from '../infrastructure/schemas/user.schema';
 @Injectable()
 export class UsersService {
   constructor(
@@ -26,7 +26,9 @@ export class UsersService {
     passwordHash: string,
     recoveryCode: string,
   ): Promise<boolean> {
-    const user = await this.usersRepository.findByRecoveryCode(recoveryCode);
+    const user = (await this.usersRepository.findByRecoveryCode(
+      recoveryCode,
+    )) as UserDocument;
     if (!user) return false;
     const recovery = user.passwordRecovery;
     if (recovery.expirationDate && recovery.expirationDate < new Date()) {
@@ -37,8 +39,9 @@ export class UsersService {
     return true;
   }
   async setConfirmationEmail(confirmationCode: string): Promise<boolean> {
-    const user =
-      await this.usersRepository.findByConfirmationCode(confirmationCode);
+    const user = (await this.usersRepository.findByConfirmationCode(
+      confirmationCode,
+    )) as UserDocument;
     if (!user || user.emailConfirmation.isConfirmed) {
       return false;
     }
@@ -54,7 +57,9 @@ export class UsersService {
     return true;
   }
   async updateConfirmationEmail(email: string) {
-    const user = await this.usersQueryRepository.findByLoginOrEmail(email);
+    const user = (await this.usersQueryRepository.findByLoginOrEmail(
+      email,
+    )) as UserDocument;
     if (!user) return false;
     user.setEmailConfirmationCode();
     await user.save();

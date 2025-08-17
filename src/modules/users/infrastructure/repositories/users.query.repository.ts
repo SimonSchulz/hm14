@@ -31,9 +31,13 @@ export class UsersQueryRepository {
     return UserViewDto.mapToMe(user);
   }
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({
+    const result = await this.userModel.findOne({
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
     });
+    if (!result) {
+      return null;
+    }
+    return result;
   }
   async checkExistByLoginOrEmail(
     login: string,

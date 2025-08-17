@@ -40,7 +40,6 @@ export class UserModel {
     this.emailConfirmation.confirmationCode = randomUUID();
     this.emailConfirmation.expirationDate = expiration;
   }
-
   setEmailConfirmation() {
     this.emailConfirmation.isConfirmed = true;
   }
@@ -58,3 +57,25 @@ export class UserModel {
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);
+// UserSchema.methods.setEmailConfirmationCode = function (this: UserDocument) {
+//   const expiration = new Date();
+//   expiration.setMinutes(expiration.getMinutes() + 10);
+//   this.emailConfirmation.confirmationCode = randomUUID();
+//   this.emailConfirmation.expirationDate = expiration;
+// };
+//
+// UserSchema.methods.setEmailConfirmed = function (this: UserDocument) {
+//   this.emailConfirmation.isConfirmed = true;
+// };
+//
+// UserSchema.methods.setPassword = function (newPassword: string) {
+//   this.passwordHash = newPassword;
+// };
+//
+// UserSchema.methods.setRecoveryCode = function (this: UserDocument) {
+//   const expiration = new Date();
+//   expiration.setMinutes(expiration.getMinutes() + 10);
+//   this.passwordRecovery.recoveryCode = randomUUID();
+//   this.passwordRecovery.expirationDate = expiration;
+// };
+UserSchema.loadClass(UserModel);

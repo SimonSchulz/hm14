@@ -9,14 +9,14 @@ export class NodemailerService {
   private email: string;
 
   constructor() {
-    this.email = process.env.NODEMAILER_EMAIL2 || 'testovich43@yandex.com';
+    this.email = 'testovich43@yandex.com';
     this.transporter = nodemailer.createTransport({
       host: 'smtp.yandex.ru',
       port: 465,
       secure: true,
       auth: {
         user: this.email,
-        pass: process.env.NODEMAILER_EMAIL_PASS2,
+        pass: 'aptxjotmglrugrdu',
       },
       tls: {
         rejectUnauthorized: false,
