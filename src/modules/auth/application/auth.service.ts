@@ -49,14 +49,10 @@ export class AuthService {
   }
 
   async registerUser(dto: RegistrationInputDto): Promise<string> {
-    const isUserExists =
-      await this.usersQueryRepository.checkExistByLoginOrEmail(
-        dto.login,
-        dto.email,
-      );
-    if (isUserExists) {
-      throw new BadRequestException('email already used');
-    }
+    await this.usersQueryRepository.checkExistByLoginOrEmail(
+      dto.login,
+      dto.email,
+    );
     const id = await this.usersService.create(dto);
     const user = await this.usersQueryRepository.findByLoginOrEmail(dto.email);
     if (!user) {

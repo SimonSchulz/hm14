@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { UserDocument, UserModel } from '../schemas/user.schema';
@@ -35,11 +39,14 @@ export class UsersQueryRepository {
     login: string,
     email: string,
   ): Promise<boolean> {
-    const user = await this.userModel
-      .findOne({
-        $or: [{ email }, { login }],
-      })
-      .lean();
+    let user = await this.userModel.findOne({ email }).lean();
+    if (user) {
+      throw new BadRequestException('email already used');
+    }
+    user = await this.userModel.findOne({ login }).lean();
+    if (user) {
+      throw new BadRequestException('login already used');
+    }
     return !!user;
   }
   async findAllUsers(
