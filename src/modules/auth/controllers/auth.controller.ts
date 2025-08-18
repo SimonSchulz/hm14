@@ -27,7 +27,6 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   login(@ExtractUserFromRequest() user: UserContextDto) {
-    console.log(user);
     return this.authService.login(user.id);
   }
 
