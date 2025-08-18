@@ -56,7 +56,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('user not found');
     }
-    this.nodemailerService.sendEmail(
+    await this.nodemailerService.sendEmail(
       user.email,
       user.emailConfirmation.confirmationCode,
       emailExamples.registrationEmail,
@@ -79,7 +79,7 @@ export class AuthService {
     user.setRecoveryCode();
     await user.save();
     const recovery = user.passwordRecovery;
-    this.nodemailerService.sendEmail(
+    await this.nodemailerService.sendEmail(
       email,
       recovery.recoveryCode,
       emailExamples.registrationEmail,
@@ -94,7 +94,7 @@ export class AuthService {
   async resendConfirmationEmail(email: string) {
     const code = await this.usersService.updateConfirmationEmail(email);
     if (!code) throw new BadRequestException('email not found');
-    this.nodemailerService.sendEmail(
+    await this.nodemailerService.sendEmail(
       email,
       code,
       emailExamples.registrationEmail,
