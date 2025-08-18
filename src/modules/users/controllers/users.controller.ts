@@ -34,7 +34,8 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() dto: InputUserDto) {
-    const userId = await this.usersService.create(dto);
+    const admin = true;
+    const userId = await this.usersService.create(dto, admin);
     const newUser = await this.usersQueryRepository.findById(userId);
     if (!newUser) throw new BadRequestException('Invalid user data');
     return newUser;

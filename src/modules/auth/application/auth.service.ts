@@ -93,12 +93,11 @@ export class AuthService {
   }
   async resendConfirmationEmail(email: string) {
     const code = await this.usersService.updateConfirmationEmail(email);
-    if (!code) return false;
+    if (!code) throw new BadRequestException('email not found');
     this.nodemailerService.sendEmail(
       email,
       code,
       emailExamples.registrationEmail,
     );
-    return true;
   }
 }
