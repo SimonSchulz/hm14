@@ -38,12 +38,14 @@ export class AuthController {
   }
 
   @Post('registration-confirmation')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async confirmRegistration(@Body() dto: ConfirmCodeDto) {
     return this.authService.confirmRegistration(dto.code);
   }
 
   @Post('registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async resendConfirmationEmail(@Body() dto: ResendingInputDto) {
     return this.authService.resendConfirmationEmail(dto.email);
@@ -68,11 +70,13 @@ export class AuthController {
   // }
 
   @Post('new-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async newPassword(@Body() dto: NewPasswordInputDto) {
     return this.authService.changePassword(dto.newPassword, dto.recoveryCode);
   }
   @Post('password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async passwordRecovery(@Body() dto: ResendingInputDto) {
     return this.authService.passwordRecovery(dto.email);
