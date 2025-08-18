@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/repositories/users.repository';
 import { InputUserDto } from '../dto/user.input.dto';
 import { User } from '../domain/entities/user.entity';
 import { UsersQueryRepository } from '../infrastructure/repositories/users.query.repository';
 import { BcryptService } from '../../auth/application/bcrypt.service';
 import { UserDocument } from '../infrastructure/schemas/user.schema';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -42,8 +43,11 @@ export class UsersService {
     const user = (await this.usersRepository.findByConfirmationCode(
       confirmationCode,
     )) as UserDocument;
-    if (!user || user.emailConfirmation.isConfirmed) {
+    if (!user) {
       return false;
+    }
+    if (user.emailConfirmation.isConfirmed) {
+      throw new BadRequestException('email already confirmed');
     }
     const recovery = user.emailConfirmation;
     if (
@@ -61,6 +65,9 @@ export class UsersService {
       email,
     )) as UserDocument;
     if (!user) return false;
+    if (user.emailConfirmation.isConfirmed) {
+      throw new BadRequestException('email already confirmed');
+    }
     user.setEmailConfirmationCode();
     await user.save();
     return user.emailConfirmation.confirmationCode;
