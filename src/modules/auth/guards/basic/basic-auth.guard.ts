@@ -18,22 +18,31 @@ export class BasicAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const authHeader = request.headers.authorization;
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      return true;
-    }
+
+    if (isPublic) return true;
+
     if (!authHeader || !authHeader.startsWith('Basic ')) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     const base64Credentials = authHeader.split(' ')[1];
-    const credentials = Buffer.from(base64Credentials, 'base64').toString(
-      'utf-8',
-    );
+    let credentials: string;
+    try {
+      credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+    } catch {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
     const [username, password] = credentials.split(':');
+
+    if (!username || !password) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
 
     if (username === this.validUsername && password === this.validPassword) {
       return true;

@@ -15,6 +15,10 @@ export class UsersService {
   ) {}
 
   async create(dto: InputUserDto, admin?: boolean): Promise<string> {
+    const existUser = await this.usersQueryRepository.findByLoginOrEmail(
+      dto.email,
+    );
+    if (existUser) throw new BadRequestException('email already exists');
     dto.password = await this.bcryptService.generateHash(dto.password);
     const user = User.createUser(dto.login, dto.email, dto.password, admin);
     return this.usersRepository.create(user);
