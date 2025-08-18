@@ -31,7 +31,7 @@ export class UsersController {
     return this.usersQueryRepository.findAllUsers(query);
   }
 
-  //@UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() dto: InputUserDto) {
@@ -42,7 +42,7 @@ export class UsersController {
     return newUser;
   }
 
-  //@UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id') id: string) {

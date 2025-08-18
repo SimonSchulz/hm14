@@ -88,7 +88,9 @@ export class AuthService {
   async confirmRegistration(code: string) {
     const result = await this.usersService.setConfirmationEmail(code);
     if (!result) {
-      throw new BadRequestException('code is invalid');
+      throw new BadRequestException(
+        'code is invalid or email already confirmed',
+      );
     }
   }
   async resendConfirmationEmail(email: string) {

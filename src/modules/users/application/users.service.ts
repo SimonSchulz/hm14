@@ -47,11 +47,8 @@ export class UsersService {
     const user = (await this.usersRepository.findByConfirmationCode(
       confirmationCode,
     )) as UserDocument;
-    if (!user) {
+    if (!user || user.emailConfirmation.isConfirmed) {
       return false;
-    }
-    if (user.emailConfirmation.isConfirmed) {
-      throw new BadRequestException('email already confirmed');
     }
     const recovery = user.emailConfirmation;
     if (
