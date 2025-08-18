@@ -30,6 +30,8 @@ export class UsersController {
   async getUsers(@Query() query: UsersQueryParams) {
     return this.usersQueryRepository.findAllUsers(query);
   }
+
+  @UseGuards(BasicAuthGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() dto: InputUserDto) {
@@ -39,6 +41,8 @@ export class UsersController {
     if (!newUser) throw new BadRequestException('Invalid user data');
     return newUser;
   }
+
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id') id: string) {
