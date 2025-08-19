@@ -13,10 +13,6 @@ import { AuthController } from '../auth/controllers/auth.controller';
 import { LocalStrategy } from '../auth/guards/local/local.strategy';
 import { JwtStrategy } from '../auth/guards/bearer/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
-import {
-  BasicGuard,
-  BasicStrategy,
-} from '../auth/guards/basic/basic-auth.guard';
 
 @Module({
   imports: [
@@ -37,8 +33,6 @@ import {
     NodemailerService,
     LocalStrategy,
     JwtStrategy,
-    BasicStrategy,
-    BasicGuard,
   ],
   exports: [
     MongooseModule,
