@@ -17,6 +17,7 @@ export class BasicAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
+
     const authHeader = request.headers.authorization;
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -26,7 +27,7 @@ export class BasicAuthGuard implements CanActivate {
 
     if (isPublic) return true;
 
-    if (authHeader === undefined || !authHeader.startsWith('Bearer ')) {
+    if (authHeader === undefined || !authHeader.startsWith('Basic ')) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 

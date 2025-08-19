@@ -30,7 +30,6 @@ export class UsersController {
     return this.usersQueryRepository.findAllUsers(query);
   }
 
-  @UseGuards(BasicAuthGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() dto: InputUserDto) {
