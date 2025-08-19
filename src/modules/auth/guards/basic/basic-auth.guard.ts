@@ -17,9 +17,9 @@ export class BasicAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
-    if (!('authorization' in request.headers)) {
-      return true;
-    }
+    // if (!('authorization' in request.headers)) {
+    //   return true;
+    // }
     const authHeader = request.headers.authorization;
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
