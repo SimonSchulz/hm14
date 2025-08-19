@@ -45,7 +45,10 @@ export class BasicAuthGuard implements CanActivate {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    if (username === this.validUsername && password === this.validPassword) {
+    if (
+      username.trim() === this.validUsername &&
+      password.trim() === this.validPassword
+    ) {
       return true;
     } else {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
