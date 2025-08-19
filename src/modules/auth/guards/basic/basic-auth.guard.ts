@@ -34,7 +34,7 @@ export class BasicAuthGuard implements CanActivate {
     const base64Credentials = authHeader.split(' ')[1];
     let credentials: string;
     try {
-      credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+      credentials = Buffer.from(base64Credentials, 'base64').toString();
     } catch {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
